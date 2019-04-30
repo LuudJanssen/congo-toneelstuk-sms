@@ -1,24 +1,32 @@
 import { messagebirdInstance } from "./messagebird.js";
-import util from "util";
+import { readNumbers } from "./read-numbers.js";
+import _ from "lodash";
 
-console.log("test");
+const numbers = readNumbers().data.map(([number, name]) => ({
+  number: number.replace(/[\s\+]/g, ""),
+  name
+}));
 
-const originator = "KittyFit";
-const body =
-  "Hey KittyFit gebruiker! We zien dat je vrienden hard aan het sporten zijn. Wil je de prestaties van je vrienden gisteravond bekijken? google.com";
-const recipients = ["31642456734", "31658950976", "31639779632"];
+const numberChunks = _.chunk(numbers, 50);
 
-messagebirdInstance.messages.create(
-  {
-    originator,
-    body,
-    recipients
-  },
-  (error, data) => {
-    if (error) {
-      throw error;
+numberChunks.forEach(numberSet => {
+  const originator = "KittyFit";
+  const body =
+    "Hey KittyFit gebruiker! We zien dat je vrienden hard aan het sporten zijn. Wil je de prestaties van je vrienden gisteravond bekijken? google.com";
+  const recipients = numberSet.map(({ number }) => number);
+
+  messagebirdInstance.messages.create(
+    {
+      originator,
+      body,
+      recipients
+    },
+    (error, data) => {
+      if (error) {
+        throw error;
+      }
+
+      console.log(data);
     }
-
-    console.log(data);
-  }
-);
+  );
+});
